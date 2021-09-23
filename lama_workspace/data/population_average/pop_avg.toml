@@ -1,19 +1,15 @@
 target_folder = "../target"
-threads = 16
+threads = 64
 filetype = "nrrd"
-fixed_volume = "301015_deformable_to_8_rescaled_8bit.nrrd"
-fixed_mask = "reg_mask_220819.nrrd" # for the registrations
-stats_mask = "mask_june_18.nrrd"    # For clacualting whole embryo volumes
-generate_new_target_each_stage = false # As we are not making a population average
-label_map = "E14_5_atlas_v24_40.nrrd"
-label_info = "E14_5_atlas_v24_40_label_info.csv"
-skip_transform_inversion = false
-staging = "embryo_volume"
-label_propagation = 'reverse_registration'
-skip_forward_registration = false
 
-[generate_deformation_fields] # Make jacobians
-192_to_10 = [ "deformable_192_to_10",]
+# This is the fixed valoume for the initial rigid stage only
+fixed_volume = "FIXED_VOLUME.nrrd"
+
+# Set to 'true' to for population average creation
+generate_new_target_each_stage = true
+
+skip_transform_inversion = true
+staging = 'none'
 
 
 [[registration_stage_params]]
@@ -52,41 +48,64 @@ MaximumNumberOfIterations = 500
 NumberOfSpatialSamples = 20000
 
 
+##################### Deformable registration stages
 [[registration_stage_params]]
-stage_id = "deformable_192_to_10"
-
+stage_id = "deformable_128"
 [registration_stage_params.elastix_parameters]
-Registration = "MultiMetricMultiResolutionRegistration"
-NumberOfResolutions = 7
-
+Registration = "MultiResolutionRegistration"
+NumberOfResolutions = 1
+NumberOfSpatialSamples = 200000
+MaximumStepLength = 3.0
+NumberOfGradientMeasurements = 10
+NumberOfSamplesForExactGradient = 20000
+NumberOfJacobianMeasurements = 4000
+MaximumNumberOfIterations = 250
 AutomaticParameterEstimation = "true"
 UseAdaptiveStepSizes = "true"
+ASGDParameterEstimationMethod = "DisplacementDistribution"
 Transform = "BSplineTransform"
+Metric = "AdvancedMattesMutualInformation"
+FinalGridSpacingInVoxels = 128
+
+
+[[registration_stage_params]]
+stage_id = "deformable_64"
+inherit_elx_params = "deformable_128"
+[registration_stage_params.elastix_parameters]
+FinalGridSpacingInVoxels = 64
+
+
+
+[[registration_stage_params]]
+stage_id = "deformable_32"
+inherit_elx_params = "deformable_128"
+[registration_stage_params.elastix_parameters]
+MaximumStepLength = 2.0
+FinalGridSpacingInVoxels = 32
+
+
+[[registration_stage_params]]
+stage_id = "deformable_16"
+inherit_elx_params = "deformable_32"
+[registration_stage_params.elastix_parameters]
+NumberOfResolutions = 1
 Metric = [ "AdvancedMattesMutualInformation", "TransformBendingEnergyPenalty",]
-Metric0Weight = [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-Metric1Weight = [0.0, 0.0, 0.0, 0.0, 50.0, 50.0, 50.0]
-FinalGridSpacingInVoxels = 10
+Registration = "MultiMetricMultiResolutionRegistration"
+FinalGridSpacingInVoxels = 16
+MaximumStepLength = 1.0
+Metric0Weight = 1.0
+Metric1Weight = 50
 
-NumberOfSpatialSamples = [10000, 10000, 10000, 10000, 1000, 50000, 50000]
-MaximumNumberOfIterations = 800
 
-GridSpacingSchedule = [ 19.2, 9.6, 4.8, 2.4, 1.6, 1.2, 1.0]
-FixedImagePyramidSchedule = [ 
-16.0, 16.0, 16.0, 
-8.0, 8.0, 8.0, 
-4.0, 4.0, 4.0, 
-2.0, 2.0, 2.0, 
-1.0, 1.0, 1.0, 
-1.0, 1.0, 1.0,
-1.0, 1.0, 1.0]
-MovingImagePyramidSchedule = [ 
-16.0, 16.0, 16.0, 
-8.0, 8.0, 8.0, 
-4.0, 4.0, 4.0, 
-2.0, 2.0, 2.0, 
-1.0, 1.0, 1.0, 
-1.0, 1.0, 1.0,
-1.0, 1.0, 1.0]
+[[registration_stage_params]]
+stage_id = "deformable_8"
+inherit_elx_params = "deformable_16"
+[registration_stage_params.elastix_parameters]
+MaximumStepLength = 1.0
+FinalGridSpacingInVoxels = 8
+
+
+######## End deforamble registration
 
 
 [global_elastix_params]

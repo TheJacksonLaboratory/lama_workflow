@@ -12,9 +12,9 @@ reg_folder = 'deformable_192_to_10'
 jac_folder = '192_to_10'
 
 # Tight mask for restricting the analysis to
-mask = 'mask_june_18.nrrd'
-label_info = 'E14_5_atlas_v24_40_label_info_nouse.csv'
-label_map = 'E14_5_atlas_v24_40.nrrd'
+mask = 'MASK.nrrd'
+label_info = 'LABEL_INFO.csv'
+label_map = 'LABEL_MAP.nrrd'
 blur_fwhm = 100
 voxel_size = 14.0
 invert_stats = false
