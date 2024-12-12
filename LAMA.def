@@ -1,0 +1,24 @@
+Bootstrap:docker
+From:amd64/ubuntu:bionic  # 18.04
+
+%post
+export LC_ALL=C.UTF-8
+export LANG=C.UTF-8
+apt-get update && DEBIAN_FRONTEND=noninteractive \
+apt-get install -yqq git r-base python3 python3-pip libgomp1 gcc g++ wget
+git clone https://github.com/mpi2/LAMA.git
+pip3 install pipenv==2018.11.26
+cd LAMA
+pipenv install --ignore-pipfile
+pipenv run pip3 install --no-deps lama-phenotype-detection
+echo ". $(pipenv --venv)/bin/activate" >> $APPTAINER_ENVIRONMENT
+wget https://github.com/SuperElastix/elastix/releases/download/4.9.0/elastix-4.9.0-linux.tar.bz2
+mkdir elastix
+tar xjf elastix-4.9.0-linux.tar.bz2 -C elastix
+
+%environment
+LC_ALL=C.UTF-8
+LANG=C.UTF-8
+LD_LIBRARY_PATH=/LAMA/elastix/lib:$LD_LIBRARY_PATH
+PATH=/LAMA/elastix/bin:$PATH
+
