@@ -40,6 +40,10 @@ You can now add this to your `PATH` variable to ensure you can run LAMA entry po
 export PATH=$PATH:$(pwd)
 ```
 
+> [!NOTE]
+> For more information about the container, please see [the technical notes](#the-container-definition)
+
+
 # Using the `LAMA.sif` container on Sumner2
 
 For using the container, you need to use an interactive session.
@@ -52,7 +56,7 @@ On Sumner2 from a login node, you can use the following to request 4 cores and 3
 sinteractive -c 4 -m 32G
 ```
 > [!IMPORTANT]
-> The Sumner2 scheduler is merciless, if your job exceeds the requested memory it will be killed.
+> The Sumner2 scheduler is merciless; if your job exceeds the requested memory it will be killed.
 
 Once in the interactive session, make sure to load the singularity/apptainer module:
 ```
@@ -148,3 +152,13 @@ In our container, these are in our `$PATH`, so they should be invoked without `.
 $ lama_reg -c tests/test_data/population_average_data/registration_config_population_average.yaml
 ```
 Other necesasry utilities such as `elastix` and `R` should also be on `$PATH` and available to be called directly.
+
+# Technical notes
+
+## The container definition
+
+- The apptainer/singularity container is build using Ubuntu Bionic (18.04) base docker image.
+- Python (3.6.9) and R (3.4.4) are installed from the official distribution using `apt`.
+- The [the LAMA GitHub repo](https://github.com/mpi2/LAMA) is cloned inside the container and can be accesssed at `/LAMA/`.
+- To resolve and create the Python environment, the `pipenv` lockfile is used from [the LAMA GitHub repo](https://github.com/mpi2/LAMA), specifically from [this commit](https://github.com/mpi2/LAMA/commit/8ca9e4ef59c67c26f9778d951f05e792536404e3). To ensure compatibility, the `pipenv` release available at the commit date of the repository was used (`pipenv==2018.11.26`). The virtual environment (venv) created by `pipenv` is activated automatically at container runtime.
+- `elastix` release 4.9.0 is installed from [the elastix GitHub repo](https://github.com/SuperElastix/elastix) and is available on the PATH inside the container.
