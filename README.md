@@ -41,7 +41,7 @@ export PATH=$PATH:$(pwd)
 ```
 
 > [!NOTE]
-> For more information about the container, please see [the technical notes](#the-container-definition)
+> For more information about the container, please see [the technical notes](#the-container-definition).
 
 
 # Using the `LAMA.sif` container on Sumner2
