@@ -1,12 +1,88 @@
 # lama_workflow
 Repo with the inner workings for a container-based LAMA workflow.
 
+# Building the LAMA container on Sumner2
+
+> [!TIP]
+> At JAX, the easiest way to build containers from the definitions in this repository is to use the `build` partition on Sumner2.
+> For more details regarding accessing and using this JAX-specific resource, please see [the instructions in SharePoint](https://jacksonlaboratory.sharepoint.com/sites/ResearchIT/SitePages/JAX-HPC-Pro-Tip.aspx).
+
+You can access it from a login node by using:  
+```bash
+sinteractive -p build -q build
+```
+Load the needed sigularity/apptainer module (note that `singularity` can be used interchangeably with the new name `apptainer`):
+```
+module load singularity
+```
+
+To build the container either clone the repository:
+```
+git clone https://github.com/TheJacksonLaboratory/lama_workflow.git
+```
+or download the container definition:
+```
+wget https://github.com/TheJacksonLaboratory/lama_workflow/raw/refs/heads/main/LAMA.def
+```
+
+Eitherway, once you have the .def file in your Sumner2 user-space or projects folder and you're using the build partition, you can build it using [`singularity build`](https://apptainer.org/docs/user/1.1/build_a_container.html) :
+
+```
+singularity build LAMA.sif LAMA.def
+```
+> [!NOTE]
+> This will take a few minutes! It will download an image, install pacakges, build the python environment, and then write the resultant .sif file.
+
+Once you see `INFO:    Build complete: LAMA.sif` you can end the session using `exit`.
+
+You can now add this to your `PATH` variable to ensure you can run LAMA entry points from other directories, such as the LAMA repository if you've cloned that. Ensure you are in the same directory as the `LAMA.sif` file and run:
+```
+export PATH=$PATH:$(pwd)
+```
+
+# Using the `LAMA.sif` container on Sumner2
+
+For using the container, you need to use an interactive session.
+> [!TIP]
+> At JAX, the easiest way to get an interactive session on Sumner2 from a login node is to use the `sinteractive` command.
+> For more details about this JAX-specific feature, see [the instructions in SharePoint](https://jacksonlaboratory.sharepoint.com/sites/ResearchIT/SitePages/HPC-Pro-T.aspx).
+  
+On Sumner2 from a login node, you can use the following to request 4 cores and 32 Gb of RAM:
+```
+sinteractive -c 4 -m 32G
+```
+> [!IMPORTANT]
+> The Sumner2 scheduler is merciless, if your job exceeds the requested memory it will be killed.
+
+Once in the interactive session, make sure to load the singularity/apptainer module:
+```
+module load singularity
+```
+
+Assuming you modified the PATH variable after building the container, you can now use it by prefixing commands with `LAMA.sif`.
+For example, you can access the Python entry points of LAMA listed here:
+https://github.com/mpi2/LAMA/blob/8ca9e4ef59c67c26f9778d951f05e792536404e3/setup.py#L56-L68
+using:
+```
+LAMA.sif <entry point>
+```
+You can also shell into the container:
+```
+LAMA.sif bash
+```
+or run a python script using:
+```
+LAMA.sif python my_script.py
+```
 
 # Running the LAMA sample workflow on Sumner
 
-Build the container from `LAMA.rec` in whichever way you prefer and place it somewhere Sumner has access to (the easiest option is probably using the JAX container builder as detailed [here](https://jacksonlaboratory.sharepoint.com/sites/ResearchIT/SitePages/Using-the-JAX-internal-Container-Builder-Service.aspx)). I'll refer to the built container as `LAMA.sif`.
+> [!WARNING]
+> This section likely needs to be updated for Sumner2. The scripts are likely to work from an interactive session using `bash <script>` but not when submitted to the cluster using `sbatch`.
+> 
 
-From now, we are following along the [walkthrough page for LAMA](https://github.com/mpi2/LAMA/wiki/walkthroughs). Grab an interactive session on Sumner (with, for example, `srun -q batch -N 1 -n 16 --mem 20G -t 01:00:00 bash`) and do the following:
+
+Grab an interactive session on Sumner (with, for example, `srun -q batch -N 1 -n 16 --mem 20G -t 01:00:00 bash`) and do the following:
 
 ```
 $ module load singularity
