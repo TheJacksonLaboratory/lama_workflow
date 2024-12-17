@@ -82,7 +82,7 @@ LAMA.sif python my_script.py
 > 
 
 
-Grab an interactive session on Sumner (with, for example, `srun -q batch -N 1 -n 16 --mem 20G -t 01:00:00 bash`) and do the following:
+From now, we are following along the [walkthrough page for LAMA](https://github.com/mpi2/LAMA/wiki/walkthroughs). Grab an interactive session on Sumner (with, for example, `srun -q batch -N 1 -n 16 --mem 20G -t 01:00:00 bash`) and do the following:
 
 ```
 $ module load singularity
