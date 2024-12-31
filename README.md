@@ -26,7 +26,10 @@ wget https://github.com/TheJacksonLaboratory/lama_workflow/raw/refs/heads/main/L
 wget https://github.com/TheJacksonLaboratory/lama_workflow/raw/refs/heads/main/requirements.txt
 ```
 
-Eitherway, once you have the .def file and requirements.txt in the same directory in your Sumner2 user-space or projects folder and you're using the build partition, you can build it using [`singularity build`](https://apptainer.org/docs/user/1.1/build_a_container.html) :
+> [!IMPORTANT]
+> The `LAMA.def` file and the `requirements.txt` must be placed in the same directory!
+
+Eitherway, using the build partition, ensure you are in the directory with the definition and requirements.txt file and then you can build the container using [`singularity build`](https://apptainer.org/docs/user/1.1/build_a_container.html) :
 
 ```
 singularity build LAMA.sif LAMA.def
