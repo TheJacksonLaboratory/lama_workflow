@@ -20,12 +20,13 @@ To build the container either clone the repository:
 ```
 git clone https://github.com/TheJacksonLaboratory/lama_workflow.git
 ```
-or download the container definition:
+or download the container definition and the Python requirements.txt (lock)file:
 ```
 wget https://github.com/TheJacksonLaboratory/lama_workflow/raw/refs/heads/main/LAMA.def
+wget https://github.com/TheJacksonLaboratory/lama_workflow/raw/refs/heads/main/requirements.txt
 ```
 
-Eitherway, once you have the .def file in your Sumner2 user-space or projects folder and you're using the build partition, you can build it using [`singularity build`](https://apptainer.org/docs/user/1.1/build_a_container.html) :
+Eitherway, once you have the .def file and requirements.txt in the same directory in your Sumner2 user-space or projects folder and you're using the build partition, you can build it using [`singularity build`](https://apptainer.org/docs/user/1.1/build_a_container.html) :
 
 ```
 singularity build LAMA.sif LAMA.def
@@ -159,6 +160,7 @@ Other necesasry utilities such as `elastix` and `R` should also be on `$PATH` an
 
 - The apptainer/singularity container is build using Ubuntu Bionic (18.04) base docker image.
 - Python (3.6.9) and R (3.4.4) are installed from the official distribution using `apt`.
-- The [the LAMA GitHub repo](https://github.com/mpi2/LAMA) is cloned inside the container and can be accesssed at `/LAMA/`.
-- To resolve and create the Python environment, the `pipenv` lockfile is used from [the LAMA GitHub repo](https://github.com/mpi2/LAMA), specifically from [this commit](https://github.com/mpi2/LAMA/commit/8ca9e4ef59c67c26f9778d951f05e792536404e3). To ensure compatibility, the `pipenv` release available at the commit date of the repository was used (`pipenv==2018.11.26`). The virtual environment (venv) created by `pipenv` is activated automatically at container runtime.
+- The [the LAMA GitHub repo](https://github.com/mpi2/LAMA) is cloned inside the container and can be accesssed at `/LAMA/`. Then, the latest commit as of 2024/12/20 is checked out (8ca9e4ef59c67c26f9778d951f05e792536404e3).
+- To resolve and create the Python environment, local testing was done with `lama_phenotype_detection == 0.9.9.100` (the latest version as of 2024/12/20) and Python 3.6.9. 
+- For reproducibility, `pip-tools` was used to generate a `requirements.txt` that acts as a lockfile with all dependencies and their hashes. This file is then used for the installation in the container
 - `elastix` release 4.9.0 is installed from [the elastix GitHub repo](https://github.com/SuperElastix/elastix) and is available on the PATH inside the container.
