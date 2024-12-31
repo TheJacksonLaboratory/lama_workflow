@@ -100,10 +100,10 @@ This will download the walkthrough data to the current folder.
 > [!IMPORTANT]
 > The walkthrough sample data was not publically available as of 2024/12/20 and may need to be downloaded from the IMPC Cloud. In this case, you can use `wget` to download the `.zip` or use `scp` to copy it from your local machine to Sumner2.
 
-Next, we need to ensure the scripts are executable:
+Next, we need to ensure that all of the scripts are executable:
 ```bash
-cd lama_walkthroughs/
-chmod u+x *.sh 
+chmod u+x *.sbatch
+chmod u+x lama_walkthroughs/*.sh 
 ```
 
 In this repo, we've provided `sbatch` scripts to run each of the parts of the walkthrough on Sumner2 as `sbatch` jobs. These are just regular `bash` scripts with `sbatch` headers defining SLURM job parameters, such as memory usage. You can run them as normal `bash` scripts, but you will need to ensure your interactive session has enough resources, especially memory. Otherwise, it's best to run them using the `sbatch` command, which will use the job parameters from the header.  
@@ -117,7 +117,7 @@ sbatch lama_popavg.sbatch
 Sumner2 will queue up your job and then run it using the parameters from the header. Output files will be stored inside `lama_walkthroughs` and named according to what was specified in the `sbatch` file (by default, `lama_popavg.out` and `lama_popavg.err`).
 
 > [!NOTE]
-> By default, all of the `sbatch` scripts point to the `lama_walkthroughs` directory. To run them on your own data, you can put the data in the template folder in this repository, `lama_workspace`, and then edit the `sbatch` scripts to comment out the line pointing to `lama_walkthroughs` and un-comment the line pointing to `lama_workspace`.
+> By default, all of the `sbatch` scripts point to the `lama_walkthroughs` directory. To run them on your own data, you can put the data in the template folder in this repository, `lama_workspace`, and then edit the `sbatch` scripts to comment out the line pointing to `lama_walkthroughs` and un-comment the line pointing to `lama_workspace`. See also [the next section of this README](#running-an-actual-workflow-on-sumner).
 
 For step 2, use `lama_spatial.sbatch` - it is similar to the previous step, but for parallelization and performance it should be submitted to Sumner2 as an array job using: 
 
