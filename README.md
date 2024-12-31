@@ -160,7 +160,7 @@ Other necesasry utilities such as `elastix` and `R` should also be on `$PATH` an
 
 - The apptainer/singularity container is build using Ubuntu Bionic (18.04) base docker image.
 - Python (3.6.9) and R (3.4.4) are installed from the official distribution using `apt`.
-- The [the LAMA GitHub repo](https://github.com/mpi2/LAMA) is cloned inside the container and can be accesssed at `/LAMA/`. Then, the latest commit as of 2024/12/20 is checked out (8ca9e4ef59c67c26f9778d951f05e792536404e3).
+- The [the LAMA GitHub repo](https://github.com/mpi2/LAMA) is cloned inside the container and can be accesssed at `/LAMA/`. Then, the latest commit as of 2024/12/20 is checked out ([8ca9e4ef59c67c26f9778d951f05e792536404e3](https://github.com/mpi2/LAMA/commit/8ca9e4ef59c67c26f9778d951f05e792536404e3)).
 - To resolve and create the Python environment, local testing was done with `lama_phenotype_detection == 0.9.9.100` (the latest version as of 2024/12/20) and Python 3.6.9. 
-- For reproducibility, `pip-tools` was used to generate a `requirements.txt` that acts as a lockfile with all dependencies and their hashes. This file is then used for the installation in the container
+- For reproducibility, `pip-tools` was used to generate a `requirements.txt` that acts as a lockfile with all dependencies and their hashes. This file is then used for the installation in the container. Note: it will be copied into the container so it needs to be in the same directory as the definition .def file.
 - `elastix` release 4.9.0 is installed from [the elastix GitHub repo](https://github.com/SuperElastix/elastix) and is available on the PATH inside the container.
