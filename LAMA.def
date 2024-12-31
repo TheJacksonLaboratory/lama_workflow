@@ -1,19 +1,24 @@
 Bootstrap:docker
 From:amd64/ubuntu:bionic  # 18.04
 
+%files
+    requirements.txt requirements.txt
+
 %post
 export LC_ALL=C.UTF-8
 export LANG=C.UTF-8
 apt-get update && DEBIAN_FRONTEND=noninteractive \
-apt-get install -yqq git r-base python3 python3-pip libgomp1 gcc g++ wget
+apt-get install -yqq git r-base \
+python3 python3-pip python3-setuptools python3-wheel \
+libgomp1 gcc g++ wget
+
 git clone https://github.com/mpi2/LAMA.git
-pip3 install pipenv==2018.11.26
 cd LAMA
-# checkout the hash that has a pipenv lockfile that works
+# checkout latest commit as of 2024/12/20
 git checkout 8ca9e4ef59c67c26f9778d951f05e792536404e3
-pipenv install --ignore-pipfile
-pipenv run pip3 install --no-deps lama-phenotype-detection
-echo ". $(pipenv --venv)/bin/activate" >> $APPTAINER_ENVIRONMENT
+pip3 install -U pip
+# install from pip-tools generated lockfile (linux 3.6.9)
+pip3 install --require-hashes --no-deps -r /requirements.txt
 wget https://github.com/SuperElastix/elastix/releases/download/4.9.0/elastix-4.9.0-linux.tar.bz2
 mkdir elastix
 tar xjf elastix-4.9.0-linux.tar.bz2 -C elastix
