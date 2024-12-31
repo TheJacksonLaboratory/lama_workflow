@@ -83,36 +83,67 @@ or run a python script using:
 LAMA.sif python my_script.py
 ```
 
-# Running the LAMA sample workflow on Sumner
+# Running the LAMA walkthrough on Sumner2
 
-> [!WARNING]
-> This section likely needs to be updated for Sumner2. The scripts are likely to work from an interactive session using `bash <script>` but not when submitted to the cluster using `sbatch`.
-> 
+> [!IMPORTANT]
+> This section is geared for running on the JAX HPC cluster Sumner2. The scripts, when submitted to the cluster using `sbatch`, have been tested and will run for the case of the [LAMA walkthrough](https://github.com/mpi2/LAMA/wiki/walkthroughs). For your own data, remember that the Sumner2 scheduler is merciless, so if your job is killed, you may need to increase the requested memory in the header of the script (`--mem=`).
 
+From now, we are following along the [walkthrough page for LAMA](https://github.com/mpi2/LAMA/wiki/walkthroughs). Grab an interactive session on Sumner2 (with, for example, `sinteractive` as above) and do the following:
 
-From now, we are following along the [walkthrough page for LAMA](https://github.com/mpi2/LAMA/wiki/walkthroughs). Grab an interactive session on Sumner (with, for example, `srun -q batch -N 1 -n 16 --mem 20G -t 01:00:00 bash`) and do the following:
-
-```
-$ module load singularity
-$ singularity exec LAMA.sif lama_get_walkthrough_data 
-$ cd lama_walkthroughs/
-$ chmod u+x *.sh 
+```bash
+module load singularity
+singularity exec LAMA.sif lama_get_walkthrough_data 
 ```
 
-This will download the walkthrough data to the current folder, then enter the `lama_walkthroughs` folder and make the `.sh` scripts executable.
+This will download the walkthrough data to the current folder.
 
-For step 1 on the walkthrough ("Make a population average"), we can use something similar to `lama_popavg.sbatch` as provided in this repository. Make sure to change references to `lama_workspace` to `lama_walkthroughs` so that it points to the right folder. To submit a job using this `sbatch` file, use something like `sbatch lama_popavg.sbatch`. Sumner will queue up your job and then run it. Output files will be stored inside `lama_walkthroughs` and named according to what was specified in the `sbatch` file (by default, I have `lama_popavg.out` and `lama_popavg.err`).
+> [!IMPORTANT]
+> The walkthrough sample data was not publically available as of 2024/12/20 and may need to be downloaded from the IMPC Cloud. In this case, you can use `wget` to download the `.zip` or use `scp` to copy it from your local machine to Sumner2.
 
-For step 2, I am providing `lama_spatial.sbatch` - it is similar to the previous step, but for parallelization and performance it should be submitted to Sumner as an array job (`sbatch --array=1-8 lama_spatial.sbatch`, for example). Make sure to change references to `lama_workspace` to `lama_walkthroughs` so that it points to the right folder. Before submitting it, check the contents of the actual script that is being called (`spatially_normalise_data.sh`) and see which TOML file is being used for config (it should be in `lama_workspace/data/wild_type_and_mutant_data/generate_data.toml`). Edit that config file to match the number of cores your batch job is asking for (16 in this case, though this and the amount of memory are just suggestions). This step in particular benefits a lot from multiple jobs running on the same data since it keeps track of what is being run by individual jobs, so maybe an array with a job per input file is a good idea, instead of always using an array of 8 jobs.
+Next, we need to ensure the scripts are executable:
+```bash
+cd lama_walkthroughs/
+chmod u+x *.sh 
+```
 
-After running this step, you can move to step 3, where you can submit a similar batch job. I have provided `lama_stats.sbatch`, and that should be submitted similarly to step 1. Make sure to change references to `lama_workspace` to `lama_walkthroughs` so that it points to the right folder. It does not benefit from multiple jobs AFAIK, so I would just submit as a single job. 
+In this repo, we've provided `sbatch` scripts to run each of the parts of the walkthrough on Sumner2 as `sbatch` jobs. These are just regular `bash` scripts with `sbatch` headers defining SLURM job parameters, such as memory usage. You can run them as normal `bash` scripts, but you will need to ensure your interactive session has enough resources, especially memory. Otherwise, it's best to run them using the `sbatch` command, which will use the job parameters from the header.  
 
-All steps seemed to use all available memory (so requesting more might be a good idea), but were very inefficient CPU-wise - there might be some optimization to be done there.
+For step 1 on the walkthrough ("Make a population average"), we can use `lama_popavg.sbatch` as provided in this repository. To submit a job using this `sbatch` file, use:
 
+```bash
+sbatch lama_popavg.sbatch
+```
+
+Sumner2 will queue up your job and then run it using the parameters from the header. Output files will be stored inside `lama_walkthroughs` and named according to what was specified in the `sbatch` file (by default, `lama_popavg.out` and `lama_popavg.err`).
+
+> [!NOTE]
+> By default, all of the `sbatch` scripts point to the `lama_walkthroughs` directory. To run them on your own data, you can put the data in the template folder in this repository, `lama_workspace`, and then edit the `sbatch` scripts to comment out the line pointing to `lama_walkthroughs` and un-comment the line pointing to `lama_workspace`.
+
+For step 2, use `lama_spatial.sbatch` - it is similar to the previous step, but for parallelization and performance it should be submitted to Sumner2 as an array job using: 
+
+```bash
+sbatch --array=1-8 lama_spatial.sbatch
+``` 
+
+> [!NOTE]
+> Again, when running on your own data, you can use the `lama_workspace` template folder. Before submitting it, check the contents of the actual script that is being called (`spatially_normalise_data.sh`) and see which TOML file is being used for config (it should be in `lama_workspace/data/wild_type_and_mutant_data/generate_data.toml`). Edit that config file to match the number of cores your batch job is asking for (16 in this case, though this and the amount of memory are just suggestions). This step in particular benefits a lot from multiple jobs running on the same data since it keeps track of what is being run by individual jobs, so maybe an array with a job per input file is a good idea, instead of always using an array of 8 jobs.
+
+
+After running this step, you can move to step 3, where you can submit a similar batch job using:
+
+```bash
+sbatch lama_stats.sbatch
+```
+
+> [!NOTE]
+> All 3 sections are rather CPU inefficient, spending most of their time using just a single core. Memory usage was variable, tending to increase as the scripts ran on, so for your own data you may need to increase the requested memory, as noted previously.
 
 # Running an actual workflow on Sumner
 
-It is a fairly straightforward thing - I have provided the relevant TOML files and .sh scripts in this repo, but they need to be modified to point towards the particular data to be used. Other than that, there is almost no change necessary.
+In this repo, the relevant TOML files and .sh scripts are provided in `lama_workspace`, but they need to be modified to point towards the particular data to be used. Other than that, there is almost no change necessary.
+
+> [!IMPORTANT]
+> Ensure that you edit the `sbatch` scripts to use the proper directory `lama_workspace`!
 
 ## Population average:
 - Replicate folder structure shown on this repo (easily done by just cloning it)
@@ -120,7 +151,7 @@ It is a fairly straightforward thing - I have provided the relevant TOML files a
 - Take whatever file you want to use as a "fixed volume" and put it inside `lama_workspace/data/target`as well
 - Edit `pop_avg.toml` inside `lama_workspace/data/population_average` accordingly, so that it points to the correct fixed volume file. 
 - It's good practice to make sure the thread number you specify in `pop_avg.toml` matches the number of threads you are asking for in `lama_popavg.sbatch`!
-- All this done, you can submit `lama_popavg.sbatch` and that should work. Output files will be stored inside `lama_walkthroughs` and named according to what was specified in the `sbatch` file (by default, I have `lama_popavg.out` and `lama_popavg.err`).
+- All this done, you can submit `lama_popavg.sbatch` and that should work. Output files will be stored inside `lama_workspace` and named according to what was specified in the `sbatch` file (by default, I have `lama_popavg.out` and `lama_popavg.err`).
 
 ## Spatial normalization:
 - Replicate folder structure shown on this repo (easily done by just cloning it)
@@ -129,17 +160,18 @@ It is a fairly straightforward thing - I have provided the relevant TOML files a
 - Edit `generate_data.toml` inside `lama_workspace/data/wild_type_and_mutant_data` accordingly. You will need to point to a fixed volume, a fixed mask, a stats mask, a label map and a label info CSV file, so your atlas should have all that info! 
 - It's good practice to make sure the thread number you specify in `generate_data.toml` matches the number of threads you are asking for in `lama_spatial.sbatch`!
 - All this done, you can submit `lama_spatial.sbatch` and that should work. Remember to submit it as an array job for faster processing (`sbatch --array=1-8 lama_spatial.sbatch`)! 
-- Output files will be stored inside `lama_walkthroughs` and named according to what was specified in the `sbatch` file (by default, I have `lama_spatial_N.out` and `lama_spatial_N.err`, where `N` is the number of the job in the array).
+- Output files will be stored inside `lama_workspace` and named according to what was specified in the `sbatch` file (by default, I have `lama_spatial_N.out` and `lama_spatial_N.err`, where `N` is the number of the job in the array).
 
 ## Stats
 - Replicate folder structure shown on this repo (easily done by just cloning it)
 - You need to run spatial normalization before this step. No extra input data is needed.
 - Edit `stats.toml` inside `lama_workspace/data/stats_with_BH_correction` accordingly. You will need to point to a stats mask, a label map and a label info CSV file. You need these for the spatial normalization anyway, so they should already be in the right place - just make sure the file names in `stats.toml` correspond to the correct files!
-- All this done, you can submit `lama_stats.sbatch` and that should work. Output files will be stored inside `lama_walkthroughs` and named according to what was specified in the `sbatch` file (by default, I have `lama_stats.out` and `lama_stats.err`).
+- All this done, you can submit `lama_stats.sbatch` and that should work. Output files will be stored inside `lama_workspace` and named according to what was specified in the `sbatch` file (by default, I have `lama_stats.out` and `lama_stats.err`).
 
 
 # Potential pitfalls
-- The biggest issue I ran into was finding an atlas with all the data LAMA needs. The provided walkthrough supplies all the relevant for E14.5, but trying to run spatial normalization and stats over E15.5 proved impossible - I assume due to my own failure to find where the corresponding atlas files were available. I have only found a population average and a label map for it and my attempts to manually reconstruct the rest of the necessary data for spatial normalization did not work. So, heads up, make sure you have target data that is enough for LAMA!
+- The biggest issue was finding an atlas with all the data LAMA needs. The provided walkthrough supplies all the relevant for E14.5, but trying to run spatial normalization and stats over E15.5 proved impossible - likely due to failure to find where the corresponding atlas files were available. Make sure you have target data that is enough for LAMA!
+- As noted previosuly, the Sumner2 scheduler is merciless! While the provided `sbatch` scripts request enough resources to run through the walkthrough, the memory amount may not be sufficient for your data. If your job is killed with an "Out of Memory" error and email notification, you will need to edit the `sbatch` script to increase the requested amount of memory.
 
 
 # A final note
